@@ -67,9 +67,9 @@ void loop()
   // Récupération et affichage de la température
   int temp = analogRead(A0);
   float temp_c = temp*(5.0/1023.0*100.0); // conversion celcius en degré
-  // Affichage de la température sur liaison Serie
-  BTSerie.println(String(temp_c));
   // Affichage de la température sur liaison Bluetooth
+  BTSerie.println(String(temp_c));
+  // Affichage de la température sur liaison Serie
   Serial.println(String(temp_c));
   
   // Si communication Bluetooth disponible
@@ -78,7 +78,7 @@ void loop()
   // Si communication Série disponible
   if(Serial.available()){}
   
-  // Attente d'une seconde pour la prochaine exécution
+  // Attente pour la prochaine exécution
   delay(2000);
 }
 
