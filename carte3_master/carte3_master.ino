@@ -103,12 +103,16 @@ void loop()
     if(i<5){
       lcd.setCursor(i,1);
       lcd.print(BTSerie.read());
+      i++;
     }
-    else if(i>=7){
+    else if(i>7){
       lcd.setCursor(0,1);
       lcd.print("        ");
+      i=0;
     }
-    i++;
+    else{
+      i++;
+    }
   }
 
   // Keep reading from Arduino Serial Monitor and send to HC-05
