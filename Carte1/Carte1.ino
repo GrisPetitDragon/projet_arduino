@@ -1,15 +1,14 @@
+// Import de la librairie SoftwareSerial
 #include <SoftwareSerial.h>
-
-// pin 10 pour arduino RX --> TxD de la carte Bluetooth
+// Pin 10 (arduino RX --> carte Bluetooth TxD)
 #define RxD 10
-// pin 11 pour arduino TX- -> RxD de la carte Bluetooth
+// Pin 11 (arduino TX- -> carte Bluetooth RxD)
 #define TxD 11
-// pin 9 pour renommage de la carte Bluetooth
+// Pin 9 (renommage carte Bluetooth)
 #define Key 9
-
-// simulation liaison Série pour le Bluetooth
+// Simulation liaison Bluetooth
 SoftwareSerial BTSerie(RxD,TxD);
-
+// Variable pour enregistrer des chaines de caractères
 String ans = String("");
 
 void setup()
@@ -20,7 +19,7 @@ void setup()
   // Configuration du Bluetooth
   pinMode(RxD, INPUT);
   pinMode(TxD, OUTPUT);
-  // Configuration du renommage
+  // Configuration le mode admin (clé)
   pinMode(Key, OUTPUT);
 
   // Initialisation de la communication Bluetooth
@@ -75,6 +74,9 @@ void loop()
   
   // Affichage de la température sur liaison Serie
   Serial.println(String(temp_c));
+
+  // Affichage de l'état du périphérique Bluetooth
+  displayState();
   
   // Attente pour la prochaine exécution
   delay(2500);
@@ -92,4 +94,22 @@ void InitCommunicationBluetooth()
 {
   BTSerie.begin(38400); //57600 //38400 //9600
   while(!BTSerie){}
+}
+
+// Récupérer l'état du périphérique bluetooth
+void displayState()
+{
+  // Configuration le mode admin (clé)
+  pinMode(Key, OUTPUT);
+  // Activer le mode AT
+  digitalWrite(Key,HIGH);
+  
+  // Récupération de l'état du périphérique Bluetooth
+  BTSerie.print("AT+STATE?\r\n");
+  Serial.println("AT+STATE?");
+  ans = BTSerie.readString();
+  Serial.println(ans);
+
+  // Désactiver le mode AT
+  digitalWrite(Key,LOW);
 }
