@@ -13,6 +13,7 @@ LiquidCrystal_I2C lcd(0x27, 20, 4);
 SoftwareSerial BTSerie(RxD,TxD);
 
 String ans = String("");
+int i = 0;
 
 void setup()
 {
@@ -99,8 +100,15 @@ void loop()
   // Keep reading from HC-05 and send to Arduino Serial Monitor
   if (BTSerie.available()){
     Serial.write(BTSerie.read());
-    lcd.setCursor(0,1);
-    lcd.print(BTSerie.read());
+    if(i<5){
+      lcd.setCursor(i,1);
+      lcd.print(BTSerie.read());
+    }
+    else if(i>=7){
+      lcd.setCursor(0,1);
+      lcd.print("        ");
+    }
+    i++;
   }
 
   // Keep reading from Arduino Serial Monitor and send to HC-05
