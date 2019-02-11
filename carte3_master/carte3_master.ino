@@ -35,6 +35,13 @@ void setup()
   
   // Renommmage du périphérique Bluetooth 
   digitalWrite(Key,HIGH);
+
+  /*
+  BTSerie.print("AT+ORGL\r\n");
+  Serial.println("AT+ORGL");
+  ans = BTSerie.readString();
+  Serial.println(BTSerie.readString());
+  */
   
   BTSerie.print("AT+NAME=BT-Carte3\r\n");
   Serial.println("AT+NAME=BT-Carte3");
