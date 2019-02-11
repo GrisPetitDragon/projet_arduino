@@ -26,40 +26,41 @@ void setup()
   // Initialisation de la communication Bluetooth
   InitCommunicationBluetooth();
   
-  // Configuration du périphérique Bluetooth
+  // Activer le mode AT
   digitalWrite(Key,HIGH);
-  
+
+  // Configuration par défaut du périphérique Bluetooth
+  BTSerie.print("AT+ORGL\r\n");
+  Serial.println("AT+ORGL");
+  ans = BTSerie.readString();
+  Serial.println(ans);
+
+  // Récupérer le nom du périphérique Bluetooth
+  BTSerie.print("AT+NAME?\r\n");
+  Serial.println("AT+NAME?");
+  ans = BTSerie.readString();
+  Serial.println(ans);
+
+  // Configurer le nom du périphérique Bluetooth
   BTSerie.print("AT+NAME=BT-Carte1\r\n");
   Serial.println("AT+NAME=BT-Carte1");
   ans = BTSerie.readString();
   Serial.println(ans);
 
+  // Récupérer le nom du périphérique Bluetooth
   BTSerie.print("AT+NAME?\r\n");
   Serial.println("AT+NAME?");
   ans = BTSerie.readString();
   Serial.println(ans);
-  
-  /*
-  BTSerie.print("AT+RMAAD\r\n");
-  Serial.println("AT+RMAAD");
-  ans = BTSerie.readString();
-  Serial.println(ans);
-  
-  BTSerie.print("AT+ROLE=0\r\n");
-  Serial.println("AT+ROLE=0");
-  ans = BTSerie.readString();
-  Serial.println(ans);
-  
-  BTSerie.print("AT+UART=38400\r\n");
-  Serial.println("AT+UART=38400");
-  ans = BTSerie.readString();
-  Serial.println(ans);
-  */
-  
-  digitalWrite(Key,LOW);
 
-  // Début de la transmission sur la liaison Série
-  //Serial.begin(38400);
+  // Récupération de l'état du périphérique Bluetooth
+  BTSerie.print("AT+STATE?\r\n");
+  Serial.println("AT+STATE?");
+  ans = BTSerie.readString();
+  Serial.println(ans);
+
+  // Désactiver le mode AT
+  digitalWrite(Key,LOW);
 }
 
 void loop()
@@ -67,19 +68,16 @@ void loop()
   // Récupération et affichage de la température
   int temp = analogRead(A0);
   float temp_c = temp*(5.0/1023.0*100.0); // conversion celcius en degré
+  //int temp_c = temp*(5.0/1023.0*100.0);
+  
   // Affichage de la température sur liaison Bluetooth
   BTSerie.println(String(temp_c));
+  
   // Affichage de la température sur liaison Serie
   Serial.println(String(temp_c));
   
-  // Si communication Bluetooth disponible
-  if(BTSerie.available()){}
-
-  // Si communication Série disponible
-  if(Serial.available()){}
-  
   // Attente pour la prochaine exécution
-  delay(2000);
+  delay(2500);
 }
 
 // Initialisation communication Série
