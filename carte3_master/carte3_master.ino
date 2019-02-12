@@ -102,13 +102,27 @@ void setup()
 
 void loop()
 {
+  char bluetooth;
+  char tmp[5]; 
+  strcpy(tmp,"");
+  
   // Keep reading from HC-05 and send to Arduino Serial Monitor
   if (BTSerie.available()){
-    char cv =BTSerie.read();
-    Serial.write(cv);
+    /*char cv*/
+    while(BTSerie.available()){
+      bluetooth=BTSerie.read();
+      strcat(tmp,&bluetooth);
+    }
+    Serial.print(tmp);
+    lcd.setCursor(0,1);
+    lcd.print(tmp);
+    strcpy(tmp,"");
+    
+    /*
     if(i<5){
       lcd.setCursor(i,1);
       lcd.print(cv);
+      lcd.print((char)223);
       i++;
     }
     else if(i>7){
@@ -118,7 +132,7 @@ void loop()
     }
     else{
       i++;
-    }
+    }*/
   }
 
   // Keep reading from Arduino Serial Monitor and send to HC-05
