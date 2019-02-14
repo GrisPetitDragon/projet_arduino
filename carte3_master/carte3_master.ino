@@ -1,158 +1,110 @@
+// Import de la librairie SoftwareSerial
 #include <SoftwareSerial.h>
+// Import de la librairie LiquidCrystal_I2C
 #include <LiquidCrystal_I2C.h>
 
-// pin 10 pour arduino RX --> TxD de la carte Bluetooth
+// Pin 10 (arduino RX --> carte Bluetooth TxD)
 #define RxD 10
-// pin 11 pour arduino TX- -> RxD de la carte Bluetooth
+// Pin 11 (arduino TX- -> carte Bluetooth RxD)
 #define TxD 11
-// pin 9 pour renommage de la carte Bluetooth
+// Pin 9 (renommage carte Bluetooth)
 #define Key 9
 
-// simulation liaison Série pour le Bluetooth
+// Simulation liaison Bluetooth
 SoftwareSerial BTSerie(RxD,TxD);
-
+// Simulation liaison LCD
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 
+// Variable pour enregistrer des chaînes de caractères
 String ans = String("");
-
-int i = 0;
+// Variables pour récupérer la température
+char bluetooth;
+char tmp[5]; 
+strcpy(tmp,"");
 
 void setup()
 {
+  // Initialisation de l'écran LCD
   lcd.init();
+  // Initialisation du fond de l'écran LCD
   lcd.backlight();
+  // Affichage de "Température °C :"
   lcd.setCursor(0,0);
   lcd.print("Temperature :");
-  
-  // Initialisation de la communication Série
-  InitCommunicationSerie();
 
-  // Configuration du Bluetooth
+  // Initialisation de la communication Série
+  Serial.begin(38400);  
+
+  // Configuration RxD Bluetooth
   pinMode(RxD, INPUT);
+  // Configuration TxD Bluetooth
   pinMode(TxD, OUTPUT);
-  // Configuration du renommage
+  // Configuration mode AT
   pinMode(Key, OUTPUT);
   
   // Initialisation de la communication Bluetooth
-  InitCommunicationBluetooth();
+  BTSerie.begin(38400);
   
   // Renommmage du périphérique Bluetooth 
   digitalWrite(Key,HIGH);
 
+  // Configuration par défaut du périphérique Bluetooth
   BTSerie.print("AT+ORGL\r\n");
-  Serial.println("AT+ORGL");
-  ans = BTSerie.readString();
-  Serial.println(BTSerie.readString());
-
+  // Récupérer le nom du périphérique Bluetooth
+  // (vérification de la configuration par défaut)
   BTSerie.print("AT+NAME?\r\n");
-  Serial.println("AT+NAME?");
-  ans = BTSerie.readString();
-  Serial.println(ans);
-  
+  // Configurer le nom du périphérique Bluetooth
   BTSerie.print("AT+NAME=BT-Carte3\r\n");
-  Serial.println("AT+NAME=BT-Carte3");
-  ans = BTSerie.readString();
-  Serial.println(BTSerie.readString());
-
+  // Récupérer le nom du périphérique Bluetooth
+  // (vérification du renommage du périphérique)
   BTSerie.print("AT+NAME?\r\n");
-  Serial.println("AT+NAME?");
-  ans = BTSerie.readString();
-  Serial.println(ans);
-
+  // Supprimer les périphériques appareillés
   BTSerie.print("AT+RMAAD\r\n");
-  Serial.println("AT+RMAAD");
-  ans = BTSerie.readString();
-  Serial.println(ans);
-
+  // Configuration de mot de passe
   BTSerie.print("AT+PSWD=1234\r\n");
-  Serial.println("AT+PSWD=1234");
-  ans = BTSerie.readString();
-  Serial.println(ans);
-
+  // Configuration du rôle master
   BTSerie.print("AT+ROLE=1\r\n");
-  Serial.println("AT+ROLE=1");
-  ans = BTSerie.readString();
-  Serial.println(ans);
-  
+  // Configuration du mode d'adressage (fixe)
   BTSerie.print("AT+CMODE=0\r\n");
-  Serial.println("AT+CMODE=0");
-  ans = BTSerie.readString();
-  Serial.println(ans);
-  
+  // Activation du périphérique Bluetooth
   BTSerie.print("AT+INIT\r\n");
-  Serial.println("AT+INIT");
-  ans = BTSerie.readString();
-  Serial.println(ans);
-
+  // Récupération des périphériques actifs
   BTSerie.print("AT+INQ\r\n");
-  Serial.println("AT+INQ");
-  ans = BTSerie.readString();
-  Serial.println(ans);
-
+  // Connexion à la carte slave
   BTSerie.print("AT+LINK=98D3,31,F51BC7\r\n");
-  Serial.println("AT+LINK=98D3,31,F51BC7");
-  ans = BTSerie.readString();
-  Serial.println(ans);
   
-  digitalWrite(Key,LOW);
+  // Affichage sur la liaison Série
+  // de chaque commande AT exécutée sur la liaison Bluetooth
+  // Serial.println("Command AT"); 
+  // récupération de la valeur de retour sur la liaison Bluetooth
+  // ans = BTSerie.readString();
+  // affichage de la valeur de retour sur sur la liaison Série
+  // Serial.println(ans);
 
-  // Début de la transmission sur la liaison Série
-  //Serial.begin(38400);
+  // Désactiver le mode AT
+  digitalWrite(Key,LOW);
 }
 
 void loop()
 {
-  char bluetooth;
-  char tmp[5]; 
-  strcpy(tmp,"");
-  
-  // Keep reading from HC-05 and send to Arduino Serial Monitor
+  // Si liaison Bluetooth disponible
   if (BTSerie.available()){
-    /*char cv*/
+    // Tant que des caractères sont reçus sur la liaison Bluetooth
     while(BTSerie.available()){
+      // Récupération d'un caractère
       bluetooth=BTSerie.read();
+      // Copie du caractère dans le tableau de température
       strcat(tmp,&bluetooth);
     }
+    // Affichage de la température sur la liaison Série
     Serial.print(tmp);
+    // Affichage de la température sur l'écran LCD
     lcd.setCursor(0,1);
     lcd.print(tmp);
+    // Réinitialisation du tableau de température
     strcpy(tmp,"");
-    
-    /*
-    if(i<5){
-      lcd.setCursor(i,1);
-      lcd.print(cv);
-      lcd.print((char)223);
-      i++;
-    }
-    else if(i>7){
-      lcd.setCursor(0,1);
-      lcd.print("        ");
-      i=0;
-    }
-    else{
-      i++;
-    }*/
   }
-
-  // Keep reading from Arduino Serial Monitor and send to HC-05
-  if (Serial.available())
-    BTSerie.write(Serial.read());
 
   // Attente d'une seconde pour la prochaine exécution
   delay(250);
-}
-
-// Initialisation communication Série
-void InitCommunicationSerie()
-{
-  Serial.begin(38400);
-  while(!Serial){}
-}
-
-// Initialisation communication bluetooth
-void InitCommunicationBluetooth()
-{
-  BTSerie.begin(38400); //38400 //57600 //38400
-  while(!BTSerie){}
 }
