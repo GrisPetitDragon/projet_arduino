@@ -1,76 +1,45 @@
-#include <SoftwareSerial.h>
+#include <SoftwareSerial.h> // Import de la librairie SoftwareSerial
 
-// pin 10 pour arduino RX --> TxD de la carte Bluetooth
-#define RxD 10
-// pin 11 pour arduino TX- -> RxD de la carte Bluetooth
-#define TxD 11
-// pin 9 pour renommage de la carte Bluetooth
-#define Key 9
+#define RxD 10 // Pin 10 (arduino RX --> carte Bluetooth TxD)
+#define TxD 11 // Pin 11 (arduino TX- -> carte Bluetooth RxD)
+#define Key 9 // Pin 9 (renommage carte Bluetooth)
 
-// simulation liaison Série pour le Bluetooth
-SoftwareSerial BTSerie(RxD,TxD);
+SoftwareSerial BTSerie(RxD,TxD); // Simulation liaison Bluetooth
+
+String ans = String(""); // Variable pour enregistrer des chaines de caractères
 
 void setup()
 {
-  // Initialisation de la communication Série
-  InitCommunicationSerie();
+  Serial.begin(38400); // Initialisation de la communication Série
   
-  // Initialisation de la communication Bluetooth
-  InitCommunicationBluetooth();
-  
-  // Configuration du Bluetooth
-  pinMode(RxD, INPUT);
-  pinMode(TxD, OUTPUT);
-  
-  // Configuration du renommage
-  pinMode(Key, OUTPUT);
-  
-  // Renommmage du périphérique Bluetooth 
-  digitalWrite(Key,HIGH); 
-  BTSerie.print("AT+NAME=BT-Carte1\r\n");
-  BTSerie.print("AT+ROLE=0\r\n");
-  digitalWrite(Key,LOW);
+  pinMode(RxD, INPUT); // Configuration RxD Bluetooth
+  pinMode(TxD, OUTPUT); // Configuration TxD Bluetooth
+  pinMode(Key, OUTPUT); // Configuration mode AT
 
-  // Début de la transmission sur la liaison Série
-  Serial.begin(9600);
+  BTSerie.begin(38400); // Initialisation communication bluetooth
+  
+  digitalWrite(Key,HIGH);  // Activer le mode AT
+
+  BTSerie.print("AT+ORGL\r\n"); // Configuration par défaut du périphérique Bluetooth
+  BTSerie.print("AT+NAME?\r\n"); // Récupérer le nom du périphérique Bluetooth (vérification de la configuration par défaut)
+  BTSerie.print("AT+NAME=BT-Carte1\r\n"); // Configurer le nom du périphérique Bluetooth
+  BTSerie.print("AT+NAME?\r\n"); // Récupérer le nom du périphérique Bluetooth (vérification du renommage du périphérique)
+  BTSerie.print("AT+STATE?\r\n"); // Récupération de l'état du périphérique Bluetooth
+
+  // Serial.println("Command AT"); // affichage sur la liaison Série de chaque commande AT exécutée sur la liaison Bluetooth
+  // ans = BTSerie.readString(); // récupération de la valeur de retour sur la liaison Bluetooth
+  // Serial.println(ans); // affichage de la valeur de retour sur sur la liaison Série
+
+  digitalWrite(Key,LOW); // Désactiver le mode AT
 }
 
 void loop()
 {
-  // Si communication Bluetooth disponible
-  if(BTSerie.available())
-  {
-    // Récupération et affichage de la température
-    int temp = analogRead(A0);
-    float temp_c = temp*(5.0/1023.0*100.0); // conversion celcius en degré
-    BTSerie.println("T1:"+String(temp_c));
-  }
-
-  // Si communication Série disponible
-  if(Serial.available())
-  {
-    // Récupération et affichage de la température
-    int temp = analogRead(A0);
-    float temp_c = temp*(5.0/1023.0*100.0); // conversion celcius en degré
-    Serial.println("T1:"+String(temp_c));
-  }
-
-  // Attente d'une seconde pour la prochaine exécution
-  delay(1000);
-}
-
-// Initialisation communication Série
-void InitCommunicationSerie()
-{
-  Serial.begin(9600);
-  while(!Serial){}
-  Serial.println("Connexion Série : Ok");
-}
-
-// Initialisation communication bluetooth
-void InitCommunicationBluetooth()
-{
-  BTSerie.begin(9600); //38400 //57600 //38400
-  while(!BTSerie){}
-  BTSerie.println("Connexion Bluetooth : Ok");
+  int temp = analogRead(A0); // Récupération et affichage de la température (pin A0)
+  float temp_c = temp*(5.0/1023.0*100.0); // conversion en degré Celsius
+  
+  BTSerie.println(String(temp_c)); // Affichage de la température sur liaison Bluetooth
+  Serial.println(String(temp_c)); // Affichage de la température sur liaison Serie
+  
+  delay(2500); // Attente pour la prochaine exécution
 }
